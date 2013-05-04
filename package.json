@@ -1,0 +1,14 @@
+{
+    "name": "odgn-entity-leveldb",
+    "version": "0.1.0",
+    "author": "Alexander Veenendaal <alex@opendoorgonorth.com> http://opendoorgonorth.com",
+
+    "dependencies": {
+        "levelup":"~0.8.0"
+    },
+
+    "devDependencies":{
+        "mocha": "~1.9.0",
+        "odgn-entity": "git+http://github.com/odogono/odgn-entity#dev"
+    }
+}
