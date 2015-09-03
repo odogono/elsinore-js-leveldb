@@ -1,15 +1,32 @@
 {
-  "name": "elsinorejs-leveldb",
+  "name": "elsinore-js-leveldb",
   "version": "0.1.0",
   "author": "Alexander Veenendaal <alex@opendoorgonorth.com> http://opendoorgonorth.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/odogono/elsinore-js-leveldb.git"
+  },
   "dependencies": {
     "backbone": "^1.2.1",
+    "elsinore-js": "^0.6.4",
     "leveldown": "^1.3.0",
     "levelup": "~1.2.1",
     "memdown": "^1.0.0",
+    "promise-queue": "^2.1.1",
+    "shelljs": "^0.5.3",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "odgn-entity": "git+http://github.com/odogono/odgn-entity#dev"
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.2.1",
+    "sinon": "^1.16.1",
+    "tape": "^4.2.0"
+  },
+  "scripts": {
+    "compile": "Gulp transpile",
+    "prepublish": "npm run compile",
+    "test": "NODE_ENV=test babel-tape-runner ./test | tap-dot",
+    "spec": "NODE_ENV=test babel-tape-runner ./test | tap-spec"
   }
 }

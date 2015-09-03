@@ -1,0 +1,73 @@
+[
+{"_e":1, "id": "/component/channel", "name":"ecs" },
+{"_e":1, "id": "/component/topic", "topic": "Entity Component Systems" },
+{"_e":1, "id": "/component/status", "status": "active"},
+
+{"_e":2, "id": "/component/channel", "name": "chat"},
+{"_e":2, "id": "/component/mode/limit", "limit": 10 },
+{"_e":2, "id": "/component/status", "status": "active"},
+
+{"_e":3, "id": "/component/channel", "name": "js"},
+{"_e":3, "id": "/component/mode/invite_only" },
+{"_e":3, "id": "/component/topic", "topic": "Javascript" },
+{"_e":3, "id": "/component/status", "status": "inactive"},
+
+{"_e":4, "id": "/component/channel", "name": "politics"},
+{"_e":4, "id": "/component/mode/invisible" },
+{"_e":4, "id": "/component/topic", "topic": "Welcome to Politics" },
+{"_e":4, "id": "/component/status", "status": "active"},
+
+{"_e":5, "id": "/component/username", "username":"aveenendaal"},
+{"_e":5, "id": "/component/nickname", "nickname":"alex"},
+{"_e":5, "id": "/component/name", "name": "Alexander Veenendaal" },
+{"_e":5, "id": "/component/status", "status": "active"},
+
+{"_e":6, "id": "/component/username", "username":"brussell"},
+{"_e":6, "id": "/component/nickname", "nickname":"bertie"},
+{"_e":6, "id": "/component/name", "name": "Bertrand Russell"},
+{"_e":6, "id": "/component/status", "status": "active"},
+
+{"_e":7, "id": "/component/username", "username":"cdarwin"},
+{"_e":7, "id": "/component/nickname", "nickname":"charles"},
+{"_e":7, "id": "/component/name", "name": "Charles Darwin" },
+{"_e":7, "id": "/component/mode/invisible" },
+
+{"_e":8, "id": "/component/username", "username":"amoyet"},
+{"_e":8, "id": "/component/nickname", "nickname":"alison"},
+{"_e":8, "id": "/component/name", "name": "Alison Moyet" },
+
+{"_e":9, "id": "/component/username", "username":"bgalindo"},
+{"_e":9, "id": "/component/nickname", "nickname":"beatrix"},
+{"_e":9, "id": "/component/name", "name": "Beatrix Galindo" },
+
+
+{"_e":10, "id": "/component/username", "username":"cporco"},
+{"_e":10, "id": "/component/nickname", "nickname":"carolyn"},
+{"_e":10, "id": "/component/name", "name": "Carolyn Porco" },
+
+{"_e":11, "id": "/component/username", "username":"dderbyshire"},
+{"_e":11, "id": "/component/nickname", "nickname":"delia"},
+{"_e":11, "id": "/component/name", "name": "Delia Derbyshire" },
+{"_e":11, "id": "/component/status", "status": "active"},
+
+
+{"_e":12, "id": "/component/channel_member", "channel": 1, "client": 5, "username":"aveenendaal", "cname":"ecs" },
+{"_e":12, "id": "/component/mode/channel_op" },
+
+{"_e":13, "id": "/component/channel_member", "channel": 1, "client": 6, "username":"brussell", "cname":"ecs" },
+
+{"_e":14, "id": "/component/channel_member", "channel": 1, "client": 8, "username":"amoyet", "cname":"ecs" },
+{"_e":14, "id": "/component/mode/invisible" },
+
+{"_e":15, "id": "/component/channel_member", "channel": 2, "client": 5, "username":"aveenendaal", "cname":"chat" },
+
+{"_e":16, "id": "/component/channel_member", "channel": 2, "client": 7, "username":"cdarwin", "cname":"chat" },
+{"_e":16, "id": "/component/mode/invisible" },
+
+{"_e":17, "id": "/component/channel_member", "channel": 2, "client": 11, "username":"dderbyshire", "cname":"chat" },
+{"_e":17, "id": "/component/mode/channel_op" },
+
+
+{"_e":18, "id": "/component/channel_member", "channel": 4, "client": 9, "username":"bgalindo", "cname":"politics" }
+
+]

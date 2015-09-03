@@ -1,0 +1,18 @@
+[
+    {
+        "id":"/entity_template/a",
+        "type":"object",
+        "properties":{
+            "a":{ "$ref":"/component/es_a" },
+            "c":{ "$ref":"/component/es_c" }
+        }
+    },
+
+    {
+        "id":"/entity_template/simple",
+        "type":"object",
+        "properties":{
+            "a":{ "$ref":"/component/es_a" }
+        }
+    }
+]

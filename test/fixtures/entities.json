@@ -1,0 +1,15 @@
+[
+    { "_e":10, "_s":"position", "x":0, "y":0 },
+    { "_e":10, "_s":"nickname", "nickname":"mark" },
+
+    { "_e":12, "_s":"position", "x":-98, "y":-30 },
+    { "_e":12, "_s":"nickname", "nickname":"peter" },
+
+    { "_e":14, "_s":"position", "x":-45, "y":22 },
+    { "_e":14, "_s":"score", "score":23 },
+    { "_e":14, "_s":"nickname", "nickname":"beatrix" },
+
+    {  "_e":15, "_s":"position", "x":30, "y":-5 },
+    {  "_e":15, "_s":"score", "score":5 },
+    {  "_e":15, "_s":"nickname", "nickname":"penny" }
+]

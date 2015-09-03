@@ -6,11 +6,18 @@ lib-cov
 *.out
 *.pid
 *.gz
+.DS_Store
+*~
 
+# we generate lib dir from transpiled src/
+lib
+dist
 pids
 logs
 results
-
-npm-debug.log
-
+var/test
+purgatory
 node_modules
+npm-debug.log
+*.sublime-project
+*.sublime-workspace
