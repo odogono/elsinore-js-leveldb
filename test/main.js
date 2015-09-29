@@ -24,18 +24,16 @@ let Utils = Elsinore.Utils;
 
 test('get all the component defs', t => {
     createEntitySet( null, {loadComponents:true, logEvents:false, debug:false})
-        .then( entitySet => { return Promise.resolve()
-            .then( () => entitySet.getComponentDefs() )
-            .then( (defs) => {
-                defs = _.reduce( defs, (result,def) => {
-                    result[def.uri] = def.hash;
-                    return result;
-                },{});
-
-                t.equals( defs['/component/status'], '417b8cb5' );
-            })
-            .then( () => destroyEntitySet(entitySet, true) )
-            .then( () => t.end() )
+        .then( ([registry,entitySet]) => {
+            return entitySet.getComponentDefs()
+                .then( (defs) => {
+                    defs = _.reduce( defs, (result,def) => {
+                        result[def.uri] = def.hash;
+                        return result;
+                    },{});
+                    t.equals( defs['/component/status'], '417b8cb5' );
+                })
+                .then( () => finalise(t,entitySet) )
 
         })
         .catch( err => { log.debug('error: ' + err ); log.debug( err.stack );} )
@@ -47,17 +45,17 @@ test('returns the newest version of the schema', t => {
     let schemaB = { id:'/schema/alpha', properties:{ channel:{type:'string'} }};
 
     return createEntitySet( registry, {clear:true})
-        .then( entitySet => { return Promise.resolve()
-            .then( () => entitySet.registerComponentDef(schemaA) )
-            .then( () => entitySet.registerComponentDef(schemaB) )
-            .then( () => entitySet.getComponentDef('/schema/alpha') )
-            .then( schema => {
-                t.ok( schema.obj.properties.channel, 'the 2nd version is the one returned' );
-                return true;
-            })
-            .then( () => destroyEntitySet(entitySet, true) )
-            .then( () => t.end() )
+        .then( ([registry,entitySet]) => {
+            return entitySet.registerComponentDef(schemaA)
+                .then( () => entitySet.registerComponentDef(schemaB) )
+                .then( () => entitySet.getComponentDef('/schema/alpha') )
+                .then( schema => {
+                    t.ok( schema.obj.properties.channel, 'the 2nd version is the one returned' );
+                    return true;
+                })
+                .then( () => finalise(t,entitySet) )
         })
+
         .catch( err => { log.debug('error: ' + err ); log.debug( err.stack );} )
 });
 
@@ -65,19 +63,19 @@ test('registering the same schema again throws an error', t => {
     let schemaA = { id:'/component/channel', properties:{ name:{type:'string'} }};
 
     return createEntitySet( null, {loadComponents:false, logEvents:false, debug:false} )
-        .then( entitySet => { return Promise.resolve()
+        .then( ([registry,entitySet]) => {
             // register once...
-            .then( () => entitySet.registerComponentDef(schemaA) )
-            // register again
-            .then( () => entitySet.registerComponentDef(schemaA) )
-            // error
-            .catch( err => {
-                t.equal(err.message,'schema /component/channel (ec3bd75b) already exists'); 
-                return;
-            })
-            .then( () => destroyEntitySet(entitySet, true) )
-            .then( () => t.end() )
+            return entitySet.registerComponentDef(schemaA)
+                // register again
+                .then( () => entitySet.registerComponentDef(schemaA) )
+                // error
+                .catch( err => {
+                    t.equal(err.message,'schema /component/channel (ec3bd75b) already exists'); 
+                    return;
+                })
+                .then( () => finalise(t,entitySet) )
         })
+        .catch( err => { log.debug('error: ' + err ); log.debug( err.stack );} )
 });
 
 
@@ -87,18 +85,19 @@ test('registering a schema and then retrieving it', t => {
     let schemaC = { id:'/component/status', properties:{ status:{type:'string'} }};
 
     return createEntitySet( null, {componentDefId:104, loadComponents:false, logEvents:false, debug:false} )
-        .then( entitySet => entitySet.registerComponentDef(schemaA) )
-        .then( entitySet => entitySet.registerComponentDef(schemaB) )
-        .then( entitySet => entitySet.registerComponentDef(schemaC) )
-        .then( entitySet => {
-            let registryId = entitySet.getRegistry().getIId( schemaA.id );
-            // log.debug('registry id is ' + registryId );
-            // t.equal(err.message,'schema /component/channel (ec3bd75b) already exists'); 
-            // printIns( entitySet, 1 );
-            return entitySet;
-        })
-        .then( entitySet => finalise(t,entitySet) )
-        
+        .then( ([registry,entitySet]) => {
+            return entitySet.registerComponentDef(schemaA)
+                .then( entitySet => entitySet.registerComponentDef(schemaB) )
+                .then( entitySet => entitySet.registerComponentDef(schemaC) )
+                .then( entitySet => {
+                    let registryId = entitySet.getRegistry().getIId( schemaA.id );
+                    // log.debug('registry id is ' + registryId );
+                    // t.equal(err.message,'schema /component/channel (ec3bd75b) already exists'); 
+                    // printIns( entitySet, 1 );
+                    return entitySet;
+                })
+                .then( () => finalise(t,entitySet) )
+            });
 });
 
 
@@ -114,17 +113,15 @@ test('registers existing component defs with the registry when opened', t => {
 
     // create a new ES, register the component defs, then remove the ES
     return createEntitySet( null, {loadComponents:false, clear:true, debug:false})
-        .then( entitySet => {registry = entitySet.getRegistry(); return entitySet} )
-        .then( entitySet => entitySet.registerComponentDef(schema) )
+        .then( ([registry,entitySet]) => {
+            return entitySet.registerComponentDef(schema)
+                .then( () => registry.removeEntitySet(entitySet) );
+        })
         // .then( entitySet => printKeys(entitySet) )
-        .then( entitySet => registry.removeEntitySet(entitySet) )
-        
         // create a new registry and ES which reads from the previous instantiation
         .then( () => createEntitySet( null, {loadComponents:false, clear:false, open:true, debug:false}) )
-        .then( entitySet => {registry = entitySet.getRegistry(); return entitySet} )
-        
         // confirm we still have the components registered by attempting to instantiate one
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             let c = registry.createComponent( '/component/channel', {name:'tali'});
             t.equal( c.get('name'), 'tali' );
             // printIns( registry.schemaRegistry, 1 );
@@ -135,12 +132,26 @@ test('registers existing component defs with the registry when opened', t => {
 });
 
 
-test('adding a component without an id or an entity id creates a new component and a new entity', t => {
-    let registry;
-
+test('adding an entity with a component returns the added entity', t => {
     return createEntitySet( null, {loadComponents:true, clear:true, debug:false, esId:10})
-        .then( entitySet => {registry = entitySet.getRegistry(); return entitySet} )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
+            let entity = registry.createEntity( { id:'/component/position', x:2, y:-2 } );
+
+            return entitySet.addEntity( entity )
+                .then( entity => {
+                    t.ok( entity.getEntityId() > 0, 'the entity should have an id' );
+                    t.ok( entitySet.hasEntity(entity.id), 'the entity ' + entity.id + ' should exist');
+                })
+                .then( finalise(t,entitySet) )
+        })
+        .catch( err => { log.debug('error: ' + err ); log.debug( err.stack );} )
+});
+
+
+
+test('adding a component without an id or an entity id creates a new component and a new entity', t => {
+    return createEntitySet( null, {loadComponents:true, clear:true, debug:false, esId:10})
+        .then( ([registry,entitySet]) => {
             let component = registry.createComponent( {id:'/component/position', x:15,y:2} );
             return entitySet.addComponent( component )
                 .then( component => entitySet.getEntity(component.getEntityId()) )
@@ -158,8 +169,7 @@ test('adding several components without an entity adds them to the same new enti
     let registry;
 
     return createEntitySet( null, {loadComponents:true, clear:true, debug:false})
-        .then( entitySet => {registry = entitySet.getRegistry(); return entitySet} )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             entitySet.on('all', eventSpy);
             return entitySet.addComponent([
                 registry.createComponent( '/component/flower', {colour:'yellow'}),
@@ -178,11 +188,9 @@ test('adding several components without an entity adds them to the same new enti
 
 test('removing a component from an entity with only one component', t => {
     let eventSpy = Sinon.spy();
-    let registry;
-
+    
     return createEntitySet( null, {loadComponents:true, clear:true, debug:false})
-        .then( entitySet => {registry = entitySet.getRegistry(); return entitySet} )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             entitySet.on('all', eventSpy);
             // Common.logEvents( entitySet );
             return entitySet.addComponent(
@@ -213,7 +221,7 @@ test('should add an entity only once', t => {
         .then( _r => {registry = _r; entities = Common.loadEntities(_r);} )
         // NOTE: we have to set the entity seed explicitly to match the loaded entities
         .then( () => createEntitySet( registry, {esId:10, entityIdSeed:1, clear:true, debug:false}) )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             let entity = entities.at(0);
             // Common.logEvents(entitySet);
             entity.set({id:0});
@@ -236,7 +244,7 @@ test('should remove an entity', t => {
         .then( _r => {registry = _r; entities = Common.loadEntities(_r);} )
         // NOTE: we have to set the entity seed explicitly to match the loaded entities
         .then( () => createEntitySet( registry, {esId:10, entityIdSeed:1, clear:true, debug:false}) )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             let entity = entities.at(0);
             // Common.logEvents(entitySet);
 
@@ -260,7 +268,7 @@ test('should emit an event when an entity is added and removed', t => {
     return Common.initialiseRegistry( {loadComponents: true} )
         .then( _r => {registry = _r; entities = Common.loadEntities(_r);} )
         .then( () => createEntitySet( registry, {esId:10, entityIdSeed:1, clear:true, debug:false}) )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             let addCalled = false, removeCalled = false;
             // Common.logEvents( entitySet );
             // entitySet.on('entity:add', addSpy );
@@ -282,7 +290,7 @@ test('should emit an event when a component is changed', t => {
     return Common.initialiseRegistry( {loadComponents: true} )
         .then( _r => {registry = _r; entities = Common.loadEntities(_r);} )
         .then( () => createEntitySet( registry, {esId:11, entityIdSeed:1, clear:true, debug:false}) )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             let entity = entities.at(0);
             let cloned, component = entity.Position;
             let spy = Sinon.spy();
@@ -309,8 +317,7 @@ test('should emit an event when a component is changed', t => {
 test('adding an existing entity changes its id if it didnt originate from the entityset', t => {
     let registry;
     return createEntitySet( null, {esId:205, loadComponents:true, clear:true, debug:false})
-        .then( entitySet => {registry = entitySet.getRegistry(); return entitySet} )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             let entity = registry.createEntity( { id:'/component/flower', colour:'white'}, {id:12} );
             // Common.logEvents( entitySet );
             return entitySet.addEntity( entity )
@@ -326,8 +333,7 @@ test('adding an existing entity changes its id if it didnt originate from the en
 test('adding an existing entity doesnt changes its id if it originated from the entityset', t => {
     let registry;
     return createEntitySet( null, {esId:205, loadComponents:true, clear:true, debug:false})
-        .then( entitySet => {registry = entitySet.getRegistry(); return entitySet} )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             let entity = registry.createEntity( { id:'/component/flower', colour:'white'}, { id:12, esid:205} );
             // Common.logEvents( entitySet );
             // printE( entity );
@@ -360,8 +366,7 @@ test('updating entity references when adding', t => {
 
     
     return createEntitySet( null, {esId:205, loadComponents:true, clear:true, debug:false})
-        .then( entitySet => {registry = entitySet.getRegistry(); return entitySet} )
-        .then( entitySet => {
+        .then( ([registry,entitySet]) => {
             let entities = Common.loadEntities( registry, data );
             // Common.logEvents( entitySet );
             entitySet.on('all', eventSpy);

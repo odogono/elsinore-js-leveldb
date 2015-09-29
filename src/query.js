@@ -1,11 +1,11 @@
 'use strict';
 
 var _ = require('underscore');
-var BitField = require('elsinore-js/lib/bit_field');
+var BitField = require('odgn-bitfield');
 var LevelEntitySet = require('./index');
 var PromiseQ = require('promise-queue');
-var Query = require('elsinore-js/lib/query/full');
-var Utils = require('elsinore-js/lib/utils');
+var Query = require('elsinore/lib/query/full');
+var Utils = require('elsinore/lib/utils');
 var CC = require('./constants');
 var LU = require('./utils');
 
@@ -26,10 +26,12 @@ LevelDbQueryContext.prototype.componentsToBitfield = function (context, componen
 *   in a new entityset which is returned as a value.
 */
 LevelDbQueryContext.prototype.commandFilter = function (context, entityFilter, filterFunction, options) {
-    var result;
-    var entities, entityContext, value;
-    var entity, entitySet;
-    var debug = context.debug;
+    let result;
+    let entities, entityContext, value;
+    let entity, entitySet;
+    let debug = context.debug;
+    let limit = _.isUndefined(options.limit) ? -1 : options.limit;
+    let offset = _.isUndefined(options.offset) ? 0 : options.offset;
 
     // log.debug('LevelDbQuery.commandFilter ' + entityFilter.constructor.name + ' ' + Utils.stringify(entityFilter));
     if (debug) {
@@ -44,8 +46,10 @@ LevelDbQueryContext.prototype.commandFilter = function (context, entityFilter, f
     // entitySet = Query.resolveEntitySet( context, entitySet );
     entitySet = Query.valueOf(context, context.last || context.entitySet, true);
 
-    entityContext = Query.createContext(context);
-    entityContext.componentIds = entityFilter.getValues(0);
+    if( filterFunction ){
+        entityContext = Query.createContext(context);
+        entityContext.componentIds = entityFilter.getValues(0);
+    }
 
     /**
         while results < limit
@@ -53,17 +57,19 @@ LevelDbQueryContext.prototype.commandFilter = function (context, entityFilter, f
                 - read the components for the 3 ids
     */
     // return readEntityIds( entitySet._db, entityFilter, null, 3 )
-    var count = 0;
+    let count = 0;
     return LU.readStream(context._db, {
         gte: CC.ENTITY_ID_BITFIELD + CC.KEY_START,
         lte: CC.ENTITY_ID_BITFIELD + CC.KEY_LAST,
         pauseable: true, // set this flag
+        limit,
+        offset,
         dataFn: function dataFn(dataResult, data, stream) {
             // log.debug('incoming dataResult ' + Utils.stringify(dataResult) );
-            var bf = entityIdBitfieldKeyToBitfield(data.key);
+            let bf = entityIdBitfieldKeyToBitfield(data.key);
             stream._superDebug = true;
             // log.debug(data.key );
-            if (!entityFilter.accept(bf, context)) {
+            if( entityFilter && !entityFilter.accept(bf, context)) {
                 // log.debug('not accepted ' + JSON.stringify(entityFilter) );
                 // log.debug( entityFilter.filters[0].toString() );
                 // log.debug( bf.toString() );
@@ -75,7 +81,7 @@ LevelDbQueryContext.prototype.commandFilter = function (context, entityFilter, f
             stream._isPaused = true;
             // log.debug('paused ' + count + ' ' + (stream.constructor.name) + ' ' + stream.cid );
             // retrieve the entity
-            context._ldbEntitySet._readEntityById(data.value).then(function (entity) {
+            context._ldbEntitySet._readEntityById(data.value).then( entity => {
 
                 // log.debug('maybe filterFunction ' + filterFunction );
                 if (filterFunction) {
@@ -109,7 +115,7 @@ LevelDbQueryContext.prototype.commandFilter = function (context, entityFilter, f
                     // log.debug('closing resumed stream ' + stream.cid );
                     return stream._resolvePromise(dataResult);
                 }
-            })['catch'](function (err) {
+            })['catch']( err => {
                 log.debug('reids.error: ' + err);log.debug(err.stack);
                 stream.destroy();
             });
@@ -121,9 +127,7 @@ LevelDbQueryContext.prototype.commandFilter = function (context, entityFilter, f
         }
     })
     // .catch( err => { log.debug('reids.error: ' + err ); log.debug( err.stack );} )
-    .then(function () {
-        return result;
-    });
+    .then( () => result );
 };
 
 // function readEntityIds( db, entityFilter, startKey, limit ){

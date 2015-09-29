@@ -1,26 +1,26 @@
 'use strict';
 
-var _ = require('underscore');
-var Backbone = require('backbone');
-var LevelUp = require('levelup');
-// var Sublevel = require('level-sublevel');
-var Path = require('path');
-var PromiseQ = require('promise-queue');
-var Sh = require('shelljs');
+import BitField from 'odgn-bitfield';
+import _ from 'underscore';
+import Backbone from 'backbone';
+import LevelUp from 'levelup';
+// import Sublevel from 'level-sublevel';
+import Path from 'path';
+import PromiseQ from 'promise-queue';
+import Sh from 'shelljs';
 
-var Elsinore = require('elsinore-js');
-var LU = require('./utils');
+import LU from './utils';
 
-var BitField = Elsinore.BitField;
-var EntityFilter = Elsinore.EntityFilter;
-var EntitySet = Elsinore.EntitySet;
-var Entity = Elsinore.Entity;
-var Errors = Elsinore.Errors;
-var Query = Elsinore.Query;
-var Registry = Elsinore.Registry;
-var Utils = Elsinore.Utils;
+import {
+    EntityFilter,
+    EntitySet,
+    Entity,
+    Registry,
+    Utils
+} from 'elsinore';
 
-var CmdBuffer = require('elsinore-js/lib/cmd_buffer/async'); //Elsinore.CmdBuffer.Async; //require('../cmd_buffer/async');
+
+var CmdBuffer = require('elsinore/lib/cmd_buffer/async');
 var Query = require('./query');
 
 var Constants = require('./constants');
@@ -296,6 +296,11 @@ var LevelEntitySet = EntitySet.extend({
         }
 
         return this._readEntityById(entityId);
+    },
+
+    hasEntity: function(entity){
+        return this.getEntity( entity, {componentBitFieldOnly:true} )
+            .then( entity => entity?true:false );
     },
 
     /**

@@ -12,7 +12,7 @@ let Sh = require('shelljs');
 let Sinon = require('sinon');
 let Util = require('util');
 
-export const Elsinore = require('elsinore-js');
+export const Elsinore = require('elsinore');
 
 let EntityFilter = Elsinore.EntityFilter;
 let EntitySet = Elsinore.EntitySet;
@@ -62,20 +62,8 @@ export function createEntitySet( registry, options ){
                 return es.addEntity( entitySet )
                     .then( () => es )
             }
-            return es;
+            return [registry,es];
         });
-
-        // .then( entitySet => {
-        //     // if( open ){ return entitySet.open(options); }
-        //     return entitySet;
-        // })
-        // .then( entitySet => {
-        //     // NOTE: MemDOWN does not appear to clear itself between uses
-        //     if( open && clearExisting ){
-        //         return entitySet.clear();
-        //     }
-        //     return entitySet;
-        // })
 }
 
 function loadFixture( fixturePath ){
@@ -234,8 +222,13 @@ export function printVar(){
     }
 }
 
+export function printE(e){
+    Util.log( require('elsinore/lib/util/to_string').toString(e) );
+}
+
 global.printIns = printIns;
 global.printVar = printVar;
+global.printE = printE;
 
 global.log = {
     debug: console.log,

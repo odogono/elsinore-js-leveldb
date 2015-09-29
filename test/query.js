@@ -75,6 +75,7 @@ test('entityset filter by attribute being within a value array', t => {
 test('multiple component filters', t => {
     return createEntitySet( null, createOptions)
         .then( entitySet => {
+
             return entitySet.query([
                 Query.all('/component/channel_member'),
                 Query.none('/component/mode/invisible')] )
@@ -87,11 +88,14 @@ test('multiple component filters', t => {
 
 
 
-test.only('query limit will constrain the number of entities that are returned', t => {
+test('query limit will constrain the number of entities that are returned', t => {
     return createEntitySet( null, createOptions)
         .then( entitySet => {
-            return entitySet.query( Query.limit(3), {debug:true} )
+            
+            return entitySet.query(Query.limit(3), {debug:true})
                 .then( result => {
+                    // printE( result );
+                    // console.log( result.map( e => e.getEntityId() ) );
                     t.equals( result.size(), 3 );
                 })
                 .then( finalise(t, entitySet) )
